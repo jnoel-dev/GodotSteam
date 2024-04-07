@@ -294,6 +294,7 @@ public:
 	void removed_connection_peer(const CSteamID &steamId);
 
 	Error create_lobby(LOBBY_TYPE lobbyType, int max_players);
+	Error leave_lobby(uint64_t lobbyId);
 	Error join_lobby(uint64_t lobbyId);
 
 	STEAM_CALLBACK(SteamMultiplayerPeer, lobby_message_scb, LobbyChatMsg_t, callbackLobbyMessage);

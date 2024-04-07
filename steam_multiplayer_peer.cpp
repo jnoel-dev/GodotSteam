@@ -31,6 +31,7 @@ uint64_t SteamMultiplayerPeer::get_lobby_id() {
 
 void SteamMultiplayerPeer::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("create_lobby", "lobby_type", "max_players"), &SteamMultiplayerPeer::create_lobby, DEFVAL(32));
+	ClassDB::bind_method(D_METHOD("leave_lobby", "lobby_id"), &SteamMultiplayerPeer::leave_lobby);
 	ClassDB::bind_method(D_METHOD("connect_lobby", "lobby_id"), &SteamMultiplayerPeer::join_lobby);
 	ClassDB::bind_method(D_METHOD("get_state"), &SteamMultiplayerPeer::get_state);
 	ClassDB::bind_method(D_METHOD("collect_debug_data"), &SteamMultiplayerPeer::collect_debug_data);
@@ -356,6 +357,15 @@ Error SteamMultiplayerPeer::create_lobby(LOBBY_TYPE lobby_type, int max_players)
 	callResultCreateLobby.Set(api_call, this, &SteamMultiplayerPeer::lobby_created_scb);
 	unique_id = 1;
 	lobby_state = LOBBY_STATE::LOBBY_STATE_HOST_PENDING;
+	return OK;
+}
+
+Error SteamMultiplayerPeer::leave_lobby(uint64_t lobbyId){
+	ERR_FAIL_COND_V_MSG(SteamMatchmaking() == NULL, ERR_DOES_NOT_EXIST, "`SteamMatchmaking()` is null.");
+	ERR_FAIL_COND_V_MSG(lobby_state != LOBBY_STATE::LOBBY_STATE_HOSTING, ERR_ALREADY_IN_USE, "CANNOT LEAVE LOBBY THAT YOU ARE NOT CONNECTED TO");
+	this->lobby_id.SetFromUint64(lobbyId);
+	SteamMatchmaking()->LeaveLobby(this->lobby_id);
+	lobby_state = LOBBY_STATE::LOBBY_STATE_NOT_CONNECTED;
 	return OK;
 }
 
